@@ -16,3 +16,8 @@ weight:
   kilogram:  1000.0       # 1000 g in 1 kg
   ounce:     28.3495      # 28.3495 g in 1 oz
   pound:     453.592      # 453.592 g in 1 lb
+
+  temperature:
+  celsius:    0
+  fahrenheit: 0
+  kelvin:     0
