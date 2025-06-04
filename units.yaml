@@ -9,3 +9,10 @@ length:
   foot:       0.3048
   yard:       0.9144
   mile:       1609.34
+
+weight:
+  milligram: 0.001        # 0.001 g in 1 mg
+  gram:      1.0          # base unit
+  kilogram:  1000.0       # 1000 g in 1 kg
+  ounce:     28.3495      # 28.3495 g in 1 oz
+  pound:     453.592      # 453.592 g in 1 lb
