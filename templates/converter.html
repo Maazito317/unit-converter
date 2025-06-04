@@ -1,26 +1,33 @@
-{# templates/temperature.html #}
+{# templates/converter.html #}
 {% extends "base.html" %}
 
 {% block content %}
 <div class="converter-container">
-  <!-- LEFT PANEL: Input Form -->
+  <!-- LEFT PANEL -->
   <div class="panel input-panel">
-    <h2>Temperature Converter</h2>
+    <h2>{{ heading }}</h2>
     <form method="post">
       <label for="value">Value:</label>
-      <input id="value" name="value" type="number" step="any" required>
+      <input id="value" name="value" type="number" step="any" required
+             value="{{ request.form.value or '' }}">
 
       <label for="from_unit">From:</label>
       <select id="from_unit" name="from_unit">
         {% for u in units %}
-          <option value="{{ u }}">{{ u.title() }}</option>
+          <option value="{{ u }}"
+            {% if request.form.from_unit == u %}selected{% endif %}>
+            {{ u.title() }}
+          </option>
         {% endfor %}
       </select>
 
       <label for="to_unit">To:</label>
       <select id="to_unit" name="to_unit">
         {% for u in units %}
-          <option value="{{ u }}">{{ u.title() }}</option>
+          <option value="{{ u }}"
+            {% if request.form.to_unit == u %}selected{% endif %}>
+            {{ u.title() }}
+          </option>
         {% endfor %}
       </select>
 
@@ -28,12 +35,12 @@
     </form>
   </div>
 
-  <!-- RIGHT PANEL: Result Display -->
+  <!-- RIGHT PANEL -->
   <div class="panel result-panel">
     {% if result %}
       <h2>Result</h2>
       <p class="result-text">{{ result }}</p>
-      <a href="{{ url_for('temperature') }}" class="btn-reset">Reset</a>
+      <a href="{{ route_url }}" class="btn-reset">Reset</a>
     {% endif %}
   </div>
 </div>

@@ -1,97 +1,74 @@
-from flask import Flask, request, render_template, redirect, url_for
+# app.py
+
+from flask import Flask, render_template, request, redirect, url_for
 from conversions import (
     convert_length, LENGTH_FACTORS,
     convert_weight, WEIGHT_FACTORS,
     convert_temperature, TEMPERATURE_UNITS
 )
 
-# 1) Instantiate the Flask application.
-#    __name__ tells Flask where to look for templates & static files.
 app = Flask(__name__)
 
 
-# 2) Define a route for the root URL.
-@app.route("/")
-def home():
-    # When someone visits "/", return this simple text.
-    return redirect(url_for("length"))
-
-
-@app.route("/length", methods=["GET", "POST"])
-def length():
+def handle_conversion(category_name, factors_or_units, convert_fn):
+    """
+    Shared helper to process a form, run conversion, and render converter.html.
+    - category_name: e.g. "Length Converter"
+    - factors_or_units: an iterable of valid unit keys (for dropdowns)
+    - convert_fn: a function(value, from_unit, to_unit) -> float
+    """
     result = None
     if request.method == "POST":
-        # Parse the form data.
         try:
             value = float(request.form["value"])
             frm_unit = request.form["from_unit"]
             to_unit = request.form["to_unit"]
-
-            # Perform the conversion.
-            converted = convert_length(value, frm_unit, to_unit)
-
-            # Format display
+            converted = convert_fn(value, frm_unit, to_unit)
+            # Format with :g to trim trailing zeros
             result = f"{value:g} {frm_unit} = {converted:g} {to_unit}"
         except (ValueError, KeyError) as e:
-            # Handle errors gracefully.
-            result = f"Error: {str(e)}"
+            result = f"Error: {e}"
+
     return render_template(
-        "length.html",
+        "converter.html",
+        heading=category_name,
+        units=factors_or_units,
         result=result,
-        units=LENGTH_FACTORS.keys()  # Pass available units to the template.
+        route_url=url_for(request.endpoint)
+    )
+
+
+@app.route("/length", methods=["GET", "POST"])
+def length():
+    return handle_conversion(
+        "Length Converter",
+        LENGTH_FACTORS.keys(),
+        convert_length
     )
 
 
 @app.route("/weight", methods=["GET", "POST"])
 def weight():
-    result = None
-    if request.method == "POST":
-        # Parse the form data.
-        try:
-            value = float(request.form["value"])
-            frm_unit = request.form["from_unit"]
-            to_unit = request.form["to_unit"]
-
-            # Perform the conversion.
-            converted = convert_weight(value, frm_unit, to_unit)
-
-            # Format display
-            result = f"{value:g} {frm_unit} = {converted:g} {to_unit}"
-        except (ValueError, KeyError) as e:
-            # Handle errors gracefully.
-            result = f"Error: {str(e)}"
-    return render_template(
-        "weight.html",
-        result=result,
-        units=WEIGHT_FACTORS.keys()  # Pass available units to the template.
+    return handle_conversion(
+        "Weight Converter",
+        WEIGHT_FACTORS.keys(),
+        convert_weight
     )
 
 
 @app.route("/temperature", methods=["GET", "POST"])
 def temperature():
-    result = None
-    if request.method == "POST":
-        try:
-            # 1) Read raw form data
-            value = float(request.form["value"])
-            frm_unit = request.form["from_unit"]
-            to_unit = request.form["to_unit"]
-            # 2) Perform conversion via convert_temperature()
-            converted = convert_temperature(value, frm_unit, to_unit)
-            # 3) Format the string in a neat way:
-            result = f"{value:g} {frm_unit} = {converted:g} {to_unit}"
-        except (ValueError, KeyError) as e:
-            result = f"Error: {e}"
-    # 4) Render the template, passing keys() of TEMPERATURE_UNITS as `units`
-    return render_template(
-        "temperature.html",
-        units=TEMPERATURE_UNITS.keys(),
-        result=result
+    return handle_conversion(
+        "Temperature Converter",
+        TEMPERATURE_UNITS.keys(),
+        convert_temperature
     )
 
 
-# 3) Run the app if this file is executed directly.
+@app.route("/")
+def home():
+    return redirect(url_for("length"))
+
+
 if __name__ == "__main__":
-    # debug=True enables live reloading and better error messages.
-    # host="0.0.0.0" makes the server accessible from outside the container (for Docker later).
     app.run(debug=True, host="0.0.0.0", port=5001)
