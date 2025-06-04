@@ -17,7 +17,7 @@ weight:
   ounce:     28.3495      # 28.3495 g in 1 oz
   pound:     453.592      # 453.592 g in 1 lb
 
-  temperature:
+temperature:
   celsius:    0
   fahrenheit: 0
   kelvin:     0
