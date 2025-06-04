@@ -1,5 +1,9 @@
 from flask import Flask, request, render_template, redirect, url_for
-from conversions import convert_length, LENGTH_FACTORS, convert_weight, WEIGHT_FACTORS
+from conversions import (
+    convert_length, LENGTH_FACTORS,
+    convert_weight, WEIGHT_FACTORS,
+    convert_temperature, TEMPERATURE_UNITS
+)
 
 # 1) Instantiate the Flask application.
 #    __name__ tells Flask where to look for templates & static files.
@@ -27,7 +31,7 @@ def length():
             converted = convert_length(value, frm_unit, to_unit)
 
             # Format display
-            result = f"{value:g} {frm_unit} = {converted:.2f} {to_unit}"
+            result = f"{value:g} {frm_unit} = {converted:g} {to_unit}"
         except (ValueError, KeyError) as e:
             # Handle errors gracefully.
             result = f"Error: {str(e)}"
@@ -52,21 +56,39 @@ def weight():
             converted = convert_weight(value, frm_unit, to_unit)
 
             # Format display
-            result = f"{value:g} {frm_unit} = {converted:.2f} {to_unit}"
+            result = f"{value:g} {frm_unit} = {converted:g} {to_unit}"
         except (ValueError, KeyError) as e:
             # Handle errors gracefully.
             result = f"Error: {str(e)}"
     return render_template(
         "weight.html",
         result=result,
-        units=LENGTH_FACTORS.keys()  # Pass available units to the template.
+        units=WEIGHT_FACTORS.keys()  # Pass available units to the template.
     )
 
 
 @app.route("/temperature", methods=["GET", "POST"])
 def temperature():
-    # Same stub behavior until we implement these later
-    return redirect(url_for("length"))
+    result = None
+    if request.method == "POST":
+        try:
+            # 1) Read raw form data
+            value = float(request.form["value"])
+            frm_unit = request.form["from_unit"]
+            to_unit = request.form["to_unit"]
+            # 2) Perform conversion via convert_temperature()
+            converted = convert_temperature(value, frm_unit, to_unit)
+            # 3) Format the string in a neat way:
+            result = f"{value:g} {frm_unit} = {converted:g} {to_unit}"
+        except (ValueError, KeyError) as e:
+            result = f"Error: {e}"
+    # 4) Render the template, passing keys() of TEMPERATURE_UNITS as `units`
+    return render_template(
+        "temperature.html",
+        units=TEMPERATURE_UNITS.keys(),
+        result=result
+    )
+
 
 # 3) Run the app if this file is executed directly.
 if __name__ == "__main__":
