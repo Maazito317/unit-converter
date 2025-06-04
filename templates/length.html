@@ -1,0 +1,38 @@
+{# templates/length.html #}
+{% extends "base.html" %}
+
+{% block content %}
+<div class="converter-container">
+  <div class="panel input-panel">
+    <h2>Length Converter</h2>
+    <form method="post">
+      <label>Value:</label>
+      <input name="value" type="number" step="any" required>
+
+      <label>From:</label>
+      <select name="from_unit">
+        {% for u in units %}
+          <option value="{{u}}">{{ u.title() }}</option>
+        {% endfor %}
+      </select>
+
+      <label>To:</label>
+      <select name="to_unit">
+        {% for u in units %}
+          <option value="{{u}}">{{ u.title() }}</option>
+        {% endfor %}
+      </select>
+
+      <button type="submit">Convert</button>
+    </form>
+  </div>
+
+  <div class="panel result-panel">
+    {% if result %}
+      <h2>Result</h2>
+      <p class="result-text">{{ result }}</p>
+      <a href="{{ url_for('length') }}" class="btn">Reset</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
